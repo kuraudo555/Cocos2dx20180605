@@ -12,37 +12,49 @@ bool BulletSprite::init() {
     if (!Layer::init()) {
 		return false;
 	}
-	this->schedule(schedule_selector(BulletSprite::ShootBullet),0.2f);
+	this->schedule(schedule_selector(BulletSprite::ShootBullet),0.1f);
 	return true;
 }
 void BulletSprite::ShootBullet(float dt) {
 	Size winSize = Director::getInstance()->getWinSize();
 	auto PlanePos =
 			PlaneLayer::sharedPlane->getChildByTag(AIRPLANE)->getPosition();
-	auto spritebullet = Sprite::createWithSpriteFrameName("bullet_1.png");
+	auto spritebullet1 = Sprite::createWithSpriteFrameName("bullet_1.png");
+    auto spritebullet2 = Sprite::createWithSpriteFrameName("bullet_1.png");
 //	(SpriteFrameCache::getInstance()->getSpriteFrameByName("bullet_1.png"));
-	this->addChild(spritebullet);
+	this->addChild(spritebullet1);
+    this->addChild(spritebullet2);
 	auto self = f_createAnimate(2, 10);
-	spritebullet->runAction(RepeatForever::create(Animate::create(self)));
-	Point bulletPos =
-			(Point(PlanePos.x,
+	spritebullet1->runAction(RepeatForever::create(Animate::create(self)));
+	Point bulletPos1 =
+			(Point(PlanePos.x - 5,
 					PlanePos.y
 							+ PlaneLayer::sharedPlane->getChildByTag(AIRPLANE)->getContentSize().height
-									/ 2 + 20));
-	spritebullet->setPosition(bulletPos);
-	spritebullet->setScale(0.4f);
-	vecBullet.pushBack(spritebullet);
+									/ 2 + 15));
+    Point bulletPos2 = (Point(PlanePos.x + 5,PlanePos.y + PlaneLayer::sharedPlane->getChildByTag(AIRPLANE)->getContentSize().height / 2 + 15));
+    
+	spritebullet1->setPosition(bulletPos1);
+	spritebullet1->setScale(0.4f);
+    spritebullet2->setPosition(bulletPos2);
+    spritebullet2->setScale(0.4f);
+	vecBullet.pushBack(spritebullet1);
+    vecBullet.pushBack(spritebullet2);
 	float flyLen = winSize.height - PlanePos.y;
 	float flyVelocity = 320 / 1;
     float realFlyDuration = flyLen / flyVelocity;
 
-	auto actionMove = MoveTo::create(realFlyDuration,
-			Point(bulletPos.x, winSize.height));
-	auto actionDone = CallFuncN::create(
+	auto actionMove1 = MoveTo::create(realFlyDuration,
+			Point(bulletPos1.x, winSize.height));
+	auto actionDone1 = CallFuncN::create(
 			CC_CALLBACK_1(BulletSprite::removeBullet, this));
+    
+    auto actionMove2 = MoveTo::create(realFlyDuration, Point(bulletPos2.x,winSize.height));
+    auto actionDone2 = CallFuncN::create(CC_CALLBACK_1(BulletSprite::removeBullet, this));
 
-	Sequence* sequence = Sequence::create(actionMove, actionDone, NULL);
-	spritebullet->runAction(sequence);
+	Sequence* sequence1 = Sequence::create(actionMove1, actionDone1, NULL);
+    Sequence* sequence2 = Sequence::create(actionMove2, actionDone2, NULL);
+	spritebullet1->runAction(sequence1);
+    spritebullet2->runAction(sequence2);
 
 }
 
